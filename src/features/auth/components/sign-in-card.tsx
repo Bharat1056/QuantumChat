@@ -5,12 +5,29 @@ import { Separator } from "@/components/ui/separator"
 import { FcGoogle } from 'react-icons/fc'
 import { FaGithub } from "react-icons/fa"
 import { authFlow } from "../types"
+import { useForm } from 'react-hook-form'
+import { signInSchema, signInSchemaType } from '@/features/auth/validation'
+import { zodResolver } from "@hookform/resolvers/zod"
 
 interface SignInCardProps {
     setState: (state: authFlow) => void
 }
 
+const signInDefaultValue = {
+    email: "",
+    password: ""
+}
+
 const SignInCard = ({ setState }: SignInCardProps) => {
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+    } = useForm<signInSchemaType>({
+        defaultValues: signInDefaultValue,
+        resolver: zodResolver(signInSchema),
+    })
     return (
         <Card className="w-full h-full p-8">
             <CardHeader>
@@ -27,6 +44,7 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         onChange={() => { }}
                         placeholder="Email"
                         type="email"
+                        name="email"
                         required
                     />
                     <Input
@@ -35,6 +53,7 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         onChange={() => { }}
                         placeholder="Password"
                         type="password"
+                        name="password"
                         required
                     />
                     <Button type="submit" className="w-full" size={'lg'} disabled={false}>
