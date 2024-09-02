@@ -8,6 +8,8 @@ import { authFlow } from "../types"
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { signInSchema, signInSchemaType } from '@/features/auth/validation'
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useState } from "react"
 
 interface SignInCardProps {
     setState: (state: authFlow) => void
@@ -19,6 +21,10 @@ const signInDefaultValue = {
 }
 
 const SignInCard = ({ setState }: SignInCardProps) => {
+
+    const { signIn } = useAuthActions();
+    const [pending, setPending] = useState(false)
+
     const {
         register,
         handleSubmit,
@@ -33,7 +39,11 @@ const SignInCard = ({ setState }: SignInCardProps) => {
     const onSubmit: SubmitHandler<signInSchemaType> = (data) => {
         console.log("submitted")
         console.log(data)
-     }
+    }
+
+    const onProvider = (value: "github" | "google"): void => {
+        signIn(value)
+    }
 
     return (
         <Card className="w-full h-full p-8">
@@ -46,30 +56,47 @@ const SignInCard = ({ setState }: SignInCardProps) => {
             <CardContent className="space-y-5 px-0 pb-0">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
                     <Input
-                        disabled={false}
+                        disabled={pending}
                         placeholder="Email"
                         {...register("email")}
                         onBlur={() => trigger("email")}
                     />
                     {errors.email && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.email.message}</span>}
                     <Input
-                        disabled={false}
+                        disabled={pending}
                         placeholder="Password"
                         {...register("password")}
                         onBlur={() => trigger("password")}
                     />
                     {errors.password && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.password.message}</span>}
-                    <Button type="submit" className="w-full" size={'lg'} disabled={false}>
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        size={'lg'}
+                        disabled={pending}
+                    >
                         Continue
                     </Button>
                 </form>
                 <Separator />
                 <div className="flex flex-col gap-y-2.5">
-                    <Button variant={'outline'} className="w-full relative" size={'lg'} disabled={false}>
+                    <Button
+                        variant={'outline'}
+                        className="w-full relative"
+                        size={'lg'}
+                        disabled={false}
+                        onClick={() => onProvider("google")}
+                    >
                         <FcGoogle className="size-5 absolute top-2.5 left-2.5" />
                         Sign in with Google
                     </Button>
-                    <Button variant={'outline'} className="w-full relative" size={'lg'} disabled={false}>
+                    <Button
+                        variant={'outline'}
+                        className="w-full relative"
+                        size={'lg'}
+                        disabled={false}
+                        onClick={() => onProvider("github")}
+                    >
                         <FaGithub className="size-5 absolute top-2.5 left-2.5" />
                         Sign in with Github
                     </Button>
