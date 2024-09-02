@@ -5,13 +5,35 @@ import { Separator } from "@/components/ui/separator"
 import { FcGoogle } from 'react-icons/fc'
 import { FaGithub } from "react-icons/fa"
 import { authFlow } from "../types"
+import { useForm, SubmitHandler } from 'react-hook-form'
+import { signUpSchema, signUpSchemaType } from '@/features/auth/validation'
+import { zodResolver } from "@hookform/resolvers/zod"
 
 interface SignUpCardProps {
     setState: (state: authFlow) => void
 }
 
+const signUpDefaultValue = {
+    email: "",
+    password: "",
+    confirmPassword: "",
+}
 
 const SignUpCard = ({ setState }: SignUpCardProps) => {
+    const {
+        register,
+        handleSubmit,
+        watch,
+        trigger,
+        formState: { errors }
+    } = useForm<signUpSchemaType>({
+        defaultValues: signUpDefaultValue,
+        resolver: zodResolver(signUpSchema),
+    })
+    const onSubmit: SubmitHandler<signUpSchemaType> = (data) => {
+        console.log("submitted")
+        console.log(data)
+    }
     return (
         <Card className="w-full h-full p-8">
             <CardHeader>
@@ -21,31 +43,28 @@ const SignUpCard = ({ setState }: SignUpCardProps) => {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 px-0 pb-0">
-                <form className="space-y-2.5">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
                     <Input
                         disabled={false}
-                        value={""}
-                        onChange={() => { }}
                         placeholder="Email"
-                        type="email"
-                        required
+                        {...register("email")}
+                        onBlur={() => trigger("email")}
                     />
+                    {errors.email && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.email.message}</span>}
                     <Input
                         disabled={false}
-                        value={""}
-                        onChange={() => { }}
                         placeholder="Password"
-                        type="password"
-                        required
+                        {...register("password")}
+                        onBlur={() => trigger("password")}
                     />
+                    {errors.password && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.password.message}</span>}
                     <Input
                         disabled={false}
-                        value={""}
-                        onChange={() => { }}
-                        placeholder="Confirm Password"
-                        type="password"
-                        required
+                        placeholder="Confirm  Password"
+                        {...register("confirmPassword")}
+                        onBlur={() => trigger("confirmPassword")}
                     />
+                    {errors.confirmPassword && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.confirmPassword.message}</span>}
                     <Button type="submit" className="w-full" size={'lg'} disabled={false}>
                         Continue
                     </Button>

@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator"
 import { FcGoogle } from 'react-icons/fc'
 import { FaGithub } from "react-icons/fa"
 import { authFlow } from "../types"
-import { useForm } from 'react-hook-form'
+import { useForm, SubmitHandler } from 'react-hook-form'
 import { signInSchema, signInSchemaType } from '@/features/auth/validation'
 import { zodResolver } from "@hookform/resolvers/zod"
 
@@ -23,11 +23,18 @@ const SignInCard = ({ setState }: SignInCardProps) => {
         register,
         handleSubmit,
         watch,
-        formState: { errors },
+        trigger,
+        formState: { errors }
     } = useForm<signInSchemaType>({
         defaultValues: signInDefaultValue,
         resolver: zodResolver(signInSchema),
     })
+
+    const onSubmit: SubmitHandler<signInSchemaType> = (data) => {
+        console.log("submitted")
+        console.log(data)
+     }
+
     return (
         <Card className="w-full h-full p-8">
             <CardHeader>
@@ -37,25 +44,21 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 px-0 pb-0">
-                <form className="space-y-2.5">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
                     <Input
                         disabled={false}
-                        value={""}
-                        onChange={() => { }}
                         placeholder="Email"
-                        type="email"
-                        name="email"
-                        required
+                        {...register("email")}
+                        onBlur={() => trigger("email")}
                     />
+                    {errors.email && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.email.message}</span>}
                     <Input
                         disabled={false}
-                        value={""}
-                        onChange={() => { }}
                         placeholder="Password"
-                        type="password"
-                        name="password"
-                        required
+                        {...register("password")}
+                        onBlur={() => trigger("password")}
                     />
+                    {errors.password && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.password.message}</span>}
                     <Button type="submit" className="w-full" size={'lg'} disabled={false}>
                         Continue
                     </Button>
