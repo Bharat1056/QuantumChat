@@ -9,7 +9,9 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { signInSchema, signInSchemaType } from '@/features/auth/validation'
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthActions } from "@convex-dev/auth/react";
+import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
+import { TriangleAlert } from 'lucide-react'
 
 interface SignInCardProps {
     setState: (state: authFlow) => void
@@ -23,25 +25,38 @@ const signInDefaultValue = {
 const SignInCard = ({ setState }: SignInCardProps) => {
 
     const { signIn } = useAuthActions();
-    const [pending, setPending] = useState(false)
+    const { toast } = useToast();
+    const [error, setError] = useState("")
 
     const {
         register,
         handleSubmit,
-        watch,
         trigger,
-        formState: { errors }
+        reset,
+        formState: { errors, isSubmitting }
     } = useForm<signInSchemaType>({
         defaultValues: signInDefaultValue,
         resolver: zodResolver(signInSchema),
     })
 
-    const onSubmit: SubmitHandler<signInSchemaType> = (data) => {
-        console.log("submitted")
-        console.log(data)
+    const onSubmit: SubmitHandler<signInSchemaType> = async (data) => {
+        try {
+            await signIn("password",
+                {
+                    ...data,
+                    flow: "signIn"
+                })
+            toast({
+                title: "Welcome to QuantumChat",
+                description: "Login Successfully",
+            })
+            reset()
+        } catch (error) {
+            setError("Invalid Email or Password")
+        }
     }
 
-    const onProvider = (value: "github" | "google"): void => {
+    const onProviderSignIn = (value: "github" | "google"): void => {
         signIn(value)
     }
 
@@ -53,17 +68,25 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                     Use your email or another service
                 </CardDescription>
             </CardHeader>
+            {
+                !!error && (
+                    <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
+                        <TriangleAlert className="size-4" />
+                        <p>{error}</p>
+                    </div>
+                )
+            }
             <CardContent className="space-y-5 px-0 pb-0">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
                     <Input
-                        disabled={pending}
+                        disabled={isSubmitting}
                         placeholder="Email"
                         {...register("email")}
                         onBlur={() => trigger("email")}
                     />
                     {errors.email && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.email.message}</span>}
                     <Input
-                        disabled={pending}
+                        disabled={isSubmitting}
                         placeholder="Password"
                         {...register("password")}
                         onBlur={() => trigger("password")}
@@ -73,9 +96,9 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         type="submit"
                         className="w-full"
                         size={'lg'}
-                        disabled={pending}
+                        disabled={isSubmitting}
                     >
-                        Continue
+                        {!isSubmitting ? "Continue" : "Loading..."}
                     </Button>
                 </form>
                 <Separator />
@@ -84,8 +107,8 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         variant={'outline'}
                         className="w-full relative"
                         size={'lg'}
-                        disabled={false}
-                        onClick={() => onProvider("google")}
+                        disabled={isSubmitting}
+                        onClick={() => onProviderSignIn("google")}
                     >
                         <FcGoogle className="size-5 absolute top-2.5 left-2.5" />
                         Sign in with Google
@@ -94,8 +117,8 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         variant={'outline'}
                         className="w-full relative"
                         size={'lg'}
-                        disabled={false}
-                        onClick={() => onProvider("github")}
+                        disabled={isSubmitting}
+                        onClick={() => onProviderSignIn("github")}
                     >
                         <FaGithub className="size-5 absolute top-2.5 left-2.5" />
                         Sign in with Github
