@@ -18,6 +18,7 @@ interface SignUpCardProps {
 }
 
 const signUpDefaultValue = {
+    fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -42,6 +43,7 @@ const SignUpCard = ({ setState }: SignUpCardProps) => {
             await signIn("password",
                 {
                     ...data,
+                    name: data.fullName,
                     flow: "signUp"
                 })
             toast({
@@ -80,6 +82,13 @@ const SignUpCard = ({ setState }: SignUpCardProps) => {
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-2.5">
                     <Input
                         disabled={isSubmitting}
+                        placeholder="Full Name"
+                        {...register("fullName")}
+                        onBlur={() => trigger("fullName")}
+                    />
+                    {errors.email && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.email.message}</span>}
+                    <Input
+                        disabled={isSubmitting}
                         placeholder="Email"
                         {...register("email")}
                         onBlur={() => trigger("email")}
@@ -89,6 +98,7 @@ const SignUpCard = ({ setState }: SignUpCardProps) => {
                         disabled={isSubmitting}
                         placeholder="Password"
                         {...register("password")}
+                        type="password"
                         onBlur={() => trigger("password")}
                     />
                     {errors.password && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.password.message}</span>}

@@ -18,6 +18,9 @@ export type signInSchemaType = z.infer<typeof signInSchema>;
 
 export const signUpSchema = z
   .object({
+    fullName: z
+      .string()
+      .min(5, { message: "Name must be atleast 3 characters" }),
     email: z
       .string()
       .min(5, { message: "Email must be required" })

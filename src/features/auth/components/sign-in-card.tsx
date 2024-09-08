@@ -89,6 +89,7 @@ const SignInCard = ({ setState }: SignInCardProps) => {
                         disabled={isSubmitting}
                         placeholder="Password"
                         {...register("password")}
+                        type="password"
                         onBlur={() => trigger("password")}
                     />
                     {errors.password && <span className="text-rose-500 font-medium pr-3 text-sm">{errors.password.message}</span>}
