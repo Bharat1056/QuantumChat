@@ -35,8 +35,8 @@ export const useCreateWorkspace = () => {
         setStatus("pending")
 
         const response = await mutation(values);
-
         options?.onSuccess?.(response);
+        return response
       } catch (error) {
         options?.onError?.(error as Error);
         if (options?.throwError) throw error;

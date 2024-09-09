@@ -1,4 +1,6 @@
 "use client"
+import React, { useState } from "react"
+import { useRouter } from "next/navigation"
 
 import {
     Dialog,
@@ -13,48 +15,47 @@ import { Button } from "@/components/ui/button"
 import { useCreateWorkspace } from "../api/use-create-workspace"
 
 export const CreateWorkspaceModal = () => {
+    const router = useRouter()
     const [open, setOpen] = useCreateWorkspaceModal()
+    const [name, setName] = useState<string>("")
 
-    const { mutate } = useCreateWorkspace()
+    const { mutate, isPending, isSuccess, isError, isSettled } = useCreateWorkspace()
 
     const handleClose = () => {
         setOpen(false)
-        // clear form`
+        setName("")
     }
 
-    const handleSubmit = async () => {
-        try {
-            const data = await mutate({
-                name: "Worksapce-1",
-            }, {
-                onSuccess(data) {
-
-                },
-            })
-        } catch (error) {
-
-        }
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        mutate({ name }, {
+            onSuccess: (data) => {
+                handleClose()
+                router.push(`/workspace/${data}`)
+            }
+        })
     }
 
     return (
         <>
             <Dialog open={open} onOpenChange={handleClose}>
-                <DialogContent>
+                <DialogContent className="outline-none border-none">
                     <DialogHeader>
                         <DialogTitle>Add a workspace</DialogTitle>
                     </DialogHeader>
-                    <form className="space-y-4">
+                    <form className="space-y-4" onSubmit={handleSubmit}>
                         <Input
-                            value={""}
+                            value={name}
                             disabled={false}
                             required
                             autoFocus
                             minLength={3}
+                            onChange={(e) => setName(e.target.value)}
                             placeholder="Workspace name e.g. 'Work', 'Personal', 'Home'"
                         />
                         <div className="flex justify-end">
-                            <Button onClick={handleSubmit} disabled={false}>
-                                Create
+                            <Button type="submit" disabled={false}>
+                                {isPending ? "Creating..." : "Create"}
                             </Button>
                         </div>
                     </form>
